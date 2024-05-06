@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 void callback(purrnet_socket_t *client) {
-  char *ip = inet_ntoa(client->addr.sin_addr);
-  purrnet_port_t port = htons(client->addr.sin_port);
+  char *ip = purrnet_addr_get_ip(client->addr);
+  purrnet_port_t port = purrnet_addr_get_port(client->addr);
   printf("Client (%s:%hu) connected!\n", ip, port);
   purrnet_message_t msg = purrnet_message_create(2048);
   purrnet_result_t result;

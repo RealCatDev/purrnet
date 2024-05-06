@@ -9,7 +9,7 @@
 #ifdef _WIN32
 #  define LIBS "-lws2_32"
 #else
-#  define LIBS 
+#  define LIBS "-lm"
 #endif
 
 #define LDFLAGS LIBS
@@ -30,7 +30,8 @@ int build() {
   Nob_Cmd cmd = {0};
   nob_cmd_append(&cmd, AR, "rcs", sb.items);
 
-  for (size_t i = 2; i < children.count; ++i) {
+  for (size_t i = 0; i < children.count; ++i) {
+    if (strlen(children.items[i]) < 3) continue;
     Nob_String_Builder path_sb = {0};
     nob_sb_append_cstr(&path_sb, "./src/");
     nob_sb_append_cstr(&path_sb, children.items[i]);
@@ -47,7 +48,7 @@ int build() {
     nob_cmd_append(&obj_cmd, "-o", output_sb.items);
     nob_cmd_append(&obj_cmd, path_sb.items);
     if (!nob_cmd_run_sync(obj_cmd)) return 1;
-  
+
     nob_cmd_append(&cmd, output_sb.items);
 
     nob_cmd_free(obj_cmd);

@@ -19,7 +19,7 @@ extern "C" {
    typedef SOCKET purrnet_sock_handle_t;
 #else
 #  include <unistd.h>
-#  include <sys/types.h> 
+#  include <sys/types.h>
 #  include <sys/socket.h>
 #  include <netinet/in.h>
    typedef int purrnet_sock_handle_t;
@@ -31,6 +31,8 @@ typedef uint16_t purrnet_port_t;
 
 purrnet_addr_t purrnet_addr_create(const char *ip, purrnet_port_t port);
 purrnet_addr_t purrnet_addr_create_all(purrnet_port_t port);
+char          *purrnet_addr_get_ip(purrnet_addr_t addr);
+purrnet_port_t purrnet_addr_get_port(purrnet_addr_t addr);
 
 typedef enum purrnet_result_e {
   PURRNET_CLOSED = -1,

@@ -2,6 +2,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
+#ifdef __linux__
+#  include <netinet/in.h>
+#  include <arpa/inet.h>
+#endif
 
 #ifdef _WIN32
    static WSADATA gPurrnetWSADATA;
@@ -51,6 +58,14 @@ purrnet_addr_t purrnet_addr_create_all(purrnet_port_t port) {
   addr.sin_port = htons(port);
   addr.sin_addr.s_addr = INADDR_ANY;
   return addr;
+}
+
+char *purrnet_addr_get_ip(purrnet_addr_t addr) {
+  return inet_ntoa(addr.sin_addr);
+}
+
+purrnet_port_t purrnet_addr_get_port(purrnet_addr_t addr) {
+  return htons(addr.sin_port);
 }
 
 // purrnet_message_t: Functions
@@ -157,7 +172,11 @@ purrnet_result_t purrnet_socket_listen(purrnet_socket_t *socket, purrnet_listen_
     items[count++] = client;
 
     int addrSize = sizeof(client->socket->addr);
-    client->socket->handle = accept(socket->handle, (struct sockaddr*)&client->socket->addr, &addrSize);
+    #ifdef _WIN32
+      client->socket->handle = accept(socket->handle, (struct sockaddr*)&client->socket->addr, &addrSize);
+    #else
+      client->socket->handle = accept(socket->handle, (struct sockaddr*)&client->socket->addr, (socklen_t*)&addrSize);
+    #endif
 
     if (client->socket->handle < 0) {
       result = purrnet_socket_error();
@@ -175,7 +194,7 @@ purrnet_result_t purrnet_socket_listen(purrnet_socket_t *socket, purrnet_listen_
     #else
       if (fork() == 0) {
         close(socket->handle);
-        handleRequest(client);
+        handleClient(&arg);
         exit(0);
       } else {
         close(client->socket->handle);
@@ -219,7 +238,11 @@ purrnet_result_t purrnet_socket_recv(purrnet_socket_t *src, purrnet_message_t *m
 }
 
 purrnet_result_t purrnet_socket_recvfrom(purrnet_socket_t *dst, purrnet_addr_t *src, purrnet_message_t *msg) {
-  int len = sizeof(*src);
+  #ifdef _WIN32
+    int len = sizeof(*src);
+  #else
+    socklen_t len = sizeof(*src);
+  #endif
   int size = 0;
   if ((size = recvfrom(dst->handle, msg->items, msg->capacity, 0, (struct sockaddr*)src, &len)) <= 0) {
     return purrnet_socket_error();

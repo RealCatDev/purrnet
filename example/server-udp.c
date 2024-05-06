@@ -14,12 +14,12 @@ int main(int argc, char **argv) {
     return 1;
   }
   printf("Listening!\n");
-  
+
   purrnet_addr_t client = {0};
   purrnet_message_t msg = purrnet_message_create(2048);
   while ((result = purrnet_socket_recvfrom(server, &client, &msg)) == PURRNET_SUCCESS) {
-    char *ip = inet_ntoa(client.sin_addr);
-    purrnet_port_t port = htons(client.sin_port);
+    char *ip = purrnet_addr_get_ip(client);
+    purrnet_port_t port = purrnet_addr_get_port(client);
     printf("[%s:%hu]: %*s\n", ip, port, (int)msg.count, msg.items);
   }
 
