@@ -1,28 +1,17 @@
 name: CI
+
 on:
-  pull_request:
   push:
-    branches: [ master ]
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
-  build-linux:
-    runs-on: ubuntu-22.04
+  build-ubuntu:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - name: build
-        run: |
-          cc -o nob nob.c
-          ./nob example
-  build-windows:
-    runs-on: windows-2019
-    steps:
-      - uses: actions/checkout@v1
-      - name: Install compiler
-        id: install_cc
-        uses: rlalik/setup-cpp-compiler@master
-        with:
-          compiler: latest
-      - name: build
-        run: |
-          cc -o nob nob.c
-          ./nob example
+    - uses: actions/checkout@v4
+    - name: build nob
+      run: cc -o nob nob.c
+    - name: build
+      run: ./nob example
